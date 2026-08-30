@@ -24,9 +24,10 @@ export const FALLBACK_CONTENT: Record<SiteContentKey, Record<string, unknown>> =
     mission:
       'Our mission is to cultivate independent thinkers and responsible citizens — students who reason clearly, act ethically, and contribute meaningfully to their communities. We commit to small class sizes, dedicated mentoring, and an inclusive culture where effort is celebrated as much as achievement.',
     management: [
-      { name: 'Sri. Raveendran Genguswamy', role: 'Correspondent' },
-      { name: 'G. Rajalakshmi', role: 'Board Member' },
-      { name: 'G. Venkatasree', role: 'Principal' },
+      { name: 'Sri Raveendran Genguswamy', role: 'Correspondent' },
+      { name: 'Smt. G. Rajalakshmi', role: 'Board Member' },
+      { name: 'Smt. Nandhini Raveendran', role: 'Secretary' },
+      { name: 'Smt. G. Venkatasree', role: 'Principal' },
     ],
   },
   academics: {
