@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 12 72% 34%;
+    --primary-foreground: 30 40% 98%;
+    --secondary: 28 30% 95%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 28 20% 96%;
+    --muted-foreground: 222 12% 45%;
+    --accent: 24 85% 55%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 30 40% 98%;
+    --border: 28 20% 88%;
+    --input: 28 20% 88%;
+    --ring: 12 72% 34%;
+    --chart-1: 12 72% 45%;
+    --chart-2: 24 85% 55%;
+    --chart-3: 173 40% 38%;
+    --chart-4: 43 74% 60%;
+    --chart-5: 27 87% 62%;
+    --radius: 0.625rem;
+  }
+  .dark {
+    --background: 222 35% 7%;
+    --foreground: 30 25% 96%;
+    --card: 222 30% 10%;
+    --card-foreground: 30 25% 96%;
+    --popover: 222 30% 10%;
+    --popover-foreground: 30 25% 96%;
+    --primary: 24 85% 58%;
+    --primary-foreground: 222 47% 8%;
+    --secondary: 222 25% 16%;
+    --secondary-foreground: 30 25% 96%;
+    --muted: 222 25% 16%;
+    --muted-foreground: 222 12% 65%;
+    --accent: 24 75% 50%;
+    --accent-foreground: 30 25% 96%;
+    --destructive: 0 62% 38%;
+    --destructive-foreground: 30 25% 96%;
+    --border: 222 20% 22%;
+    --input: 222 20% 22%;
+    --ring: 24 85% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv01";
+  }
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.6) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.6) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .hero-mask {
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
+  }
+}
