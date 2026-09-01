@@ -70,6 +70,52 @@ export type AdmissionsInquiry = {
   created_at: string;
 };
 
+export type AdmissionLevelCategory =
+  | 'nursery_primary'
+  | 'middle_school'
+  | 'high_school'
+  | 'higher_secondary';
+
+export type AdmissionApplication = {
+  id: string;
+  application_no: string;
+  academic_year: string;
+  level_category: AdmissionLevelCategory;
+  grade_applying: string;
+  stream?: string;
+  student_name: string;
+  date_of_birth: string;
+  gender: 'Male' | 'Female' | 'Other';
+  blood_group?: string;
+  nationality: string;
+  mother_tongue: string;
+  aadhaar_no?: string;
+  previous_school?: string;
+  previous_grade?: string;
+  medium_of_instruction?: string;
+  father_name: string;
+  father_occupation?: string;
+  father_phone: string;
+  mother_name: string;
+  mother_occupation?: string;
+  mother_phone?: string;
+  guardian_name?: string;
+  guardian_phone?: string;
+  primary_email: string;
+  residential_address: string;
+  city: string;
+  pincode: string;
+  district: string;
+  state: string;
+  transport_required: boolean;
+  transport_pickup_location?: string;
+  medical_notes?: string;
+  status: 'submitted' | 'under_review' | 'interview_scheduled' | 'approved' | 'enrolled' | 'rejected';
+  email_sent_to_school: boolean;
+  recipient_email: string;
+  created_at: string;
+};
+
 export type AdminProfile = {
   user_id: string;
   display_name: string;

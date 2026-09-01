@@ -49,9 +49,9 @@ export function HeroSection({ heading, body }: HeroSectionProps) {
         {/* Hero Showcase Image with medium circled emblem in the right side corner */}
         <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
           {/* Main School Campus Photo with full clarity, exact aspect ratio and unaltered details */}
-          <div className="relative w-full overflow-hidden bg-muted" style={{ aspectRatio: '1870 / 841' }}>
+          <div className="relative w-full overflow-hidden bg-muted aspect-[16/9] sm:aspect-[16/9]">
             <Image
-              src="/images/51409c9e-5c41-455d-9f96-9ea3775f1f7f.png"
+              src="/images/school-assembly-hero.jpg"
               alt="Dr. V. Genguswamy Naidu Matriculation Higher Secondary School Campus and Students Assembly"
               fill
               priority
