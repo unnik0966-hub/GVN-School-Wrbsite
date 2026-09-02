@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   title: 'Dr. V. Genguswamy Naidu Matriculation Higher Secondary School',
   description:
     'A matriculation higher secondary school nurturing confident, curious, and compassionate learners since 1982.',
+
+  verification: {
+    google: 'PcmjStDsZb1ma0Sqn1BZrbAzgmN5WXs9r1b8XTCjoRw',
+  },
+
   openGraph: {
     title: 'Dr. V. Genguswamy Naidu Matriculation Higher Secondary School',
     description:
