@@ -1,6 +1,15 @@
+import type { Metadata } from 'next';
 import { getContent } from '@/lib/content';
 import { SectionHeading } from '@/components/site/section-heading';
 import { Mail, MapPin, Phone, Clock } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Contact Us',
+  description: 'Get in touch with Dr. V. Genguswamy Naidu Matriculation Higher Secondary School. Find campus address, contact numbers, email, and visiting hours.',
+  alternates: {
+    canonical: '/contact',
+  },
+};
 
 export default async function ContactPage() {
   const contact = await getContent('contact');

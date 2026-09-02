@@ -1,8 +1,17 @@
+import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import type { SchoolEvent } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { formatDate } from '@/lib/format';
 import { CalendarDays, MapPin } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'School Events & Calendar',
+  description: 'Upcoming school events, celebrations, sports meets, cultural programs, and academic calendar.',
+  alternates: {
+    canonical: '/events',
+  },
+};
 
 export default async function EventsPage() {
   const { data } = await supabase

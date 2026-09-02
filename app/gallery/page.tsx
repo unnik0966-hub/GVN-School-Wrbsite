@@ -1,8 +1,17 @@
+import type { Metadata } from 'next';
 import { Mail, Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { GalleryGrid } from '@/components/site/gallery-grid';
+
+export const metadata: Metadata = {
+  title: 'Photo Gallery',
+  description: 'Moments, celebrations, and campus life at Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+  alternates: {
+    canonical: '/gallery',
+  },
+};
 
 const GALLERY_EMAIL = 'vgnprincipal@gmail.com';
 

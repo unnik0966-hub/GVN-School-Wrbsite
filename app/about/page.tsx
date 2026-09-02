@@ -1,5 +1,14 @@
+import type { Metadata } from 'next';
 import { getContent } from '@/lib/content';
 import { SectionHeading } from '@/components/site/section-heading';
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn about the history, mission, management, and achievements of Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+  alternates: {
+    canonical: '/about',
+  },
+};
 import {
   Users,
   Target,

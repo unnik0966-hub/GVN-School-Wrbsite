@@ -22,7 +22,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+    href === '/' ? pathname === '/' : (pathname?.startsWith(href) ?? false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">

@@ -114,7 +114,7 @@ function LoginForm() {
             </Button>
           </form>
 
-          {params.get('error') === 'unauthorized' && (
+          {params?.get('error') === 'unauthorized' && (
             <p className="mt-4 rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
               Your account is not authorized to manage school content.
             </p>

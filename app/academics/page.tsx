@@ -1,8 +1,17 @@
+import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import { getContent } from '@/lib/content';
 import type { StaffMember } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { BookOpen } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Academics & Curriculum',
+  description: 'Explore academic streams, curriculum, faculty, and educational programs at Dr. V. Genguswamy Naidu MHSS.',
+  alternates: {
+    canonical: '/academics',
+  },
+};
 
 export default async function AcademicsPage() {
   const academics = await getContent('academics');
