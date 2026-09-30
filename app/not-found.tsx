@@ -1,6 +1,7 @@
+'use client';
+
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Home, ArrowLeft } from 'lucide-react';
+import { Home } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -13,18 +14,21 @@ export default function NotFound() {
         The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
       </p>
       <div className="mt-6 flex items-center gap-3">
-        <Button asChild variant="default">
-          <Link href="/" className="gap-2">
-            <Home className="h-4 w-4" />
-            Back to Home
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/admissions" className="gap-2">
-            Admissions
-          </Link>
-        </Button>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <Home className="h-4 w-4" />
+          Back to Home
+        </Link>
+        <Link
+          href="/admissions"
+          className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+        >
+          Admissions
+        </Link>
       </div>
     </div>
   );
 }
+

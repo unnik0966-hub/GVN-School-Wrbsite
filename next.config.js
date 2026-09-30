@@ -5,7 +5,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
+  experimental: {
+    serverComponentsExternalPackages: ['tailwind-merge'],
+  },
 };
 
 module.exports = nextConfig;
+
 
