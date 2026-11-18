@@ -313,7 +313,7 @@ class MockSupabaseStore {
     gallery_photos: [...INITIAL_GALLERY],
     admissions_inquiries: [...INITIAL_INQUIRIES],
     admissions_applications: [...INITIAL_APPLICATIONS],
-    admin_profiles: [{ user_id: 'mock-admin-id', display_name: 'School Administrator' }],
+    admin_profiles: [{ user_id: 'mock-admin-id', display_name: 'Smt. G. Venkatasree, Principal' }],
     site_content: [
       { id: '1', content_key: 'home', content: getFallbackContent('home') },
       { id: '2', content_key: 'about', content: getFallbackContent('about') },
@@ -334,7 +334,13 @@ class MockSupabaseStore {
           const parsed = JSON.parse(saved);
           this.data = { ...this.data, ...parsed };
           if (!Array.isArray(this.data.admin_profiles) || !this.data.admin_profiles.some((p: any) => p.user_id === 'mock-admin-id')) {
-            this.data.admin_profiles = [{ user_id: 'mock-admin-id', display_name: 'School Administrator' }, ...(this.data.admin_profiles || [])];
+            this.data.admin_profiles = [{ user_id: 'mock-admin-id', display_name: 'Smt. G. Venkatasree, Principal' }, ...(this.data.admin_profiles || [])];
+          } else {
+            this.data.admin_profiles = this.data.admin_profiles.map((p: any) =>
+              p.user_id === 'mock-admin-id' && p.display_name === 'School Administrator'
+                ? { ...p, display_name: 'Smt. G. Venkatasree, Principal' }
+                : p
+            );
           }
         }
         const savedUser = localStorage.getItem('vgn_mock_user');

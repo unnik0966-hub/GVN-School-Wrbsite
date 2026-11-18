@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 type AdminContextValue = {
   session: Session | null;
   user: User | null;
+  adminName: string | null;
   loading: boolean;
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -17,21 +18,24 @@ const AdminContext = createContext<AdminContextValue | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [adminName, setAdminName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const refreshAdmin = useCallback(async (userId?: string): Promise<boolean> => {
     if (!userId) {
       setIsAdmin(false);
+      setAdminName(null);
       return false;
     }
     const { data } = await supabase
       .from('admin_profiles')
-      .select('user_id')
+      .select('user_id, display_name')
       .eq('user_id', userId)
       .maybeSingle();
     const ok = Boolean(data);
     setIsAdmin(ok);
+    setAdminName(data?.display_name || (ok ? 'Smt. G. Venkatasree, Principal' : null));
     return ok;
   }, []);
 
@@ -54,6 +58,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         refreshAdmin(newSession.user.id);
       } else {
         setIsAdmin(false);
+        setAdminName(null);
       }
     });
 
@@ -84,7 +89,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminContext.Provider
-      value={{ session, user: session?.user ?? null, loading, isAdmin, signIn, signOut }}
+      value={{ session, user: session?.user ?? null, adminName, loading, isAdmin, signIn, signOut }}
     >
       {children}
     </AdminContext.Provider>

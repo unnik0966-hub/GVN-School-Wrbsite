@@ -25,7 +25,7 @@
 
 CREATE TABLE IF NOT EXISTS public.admin_profiles (
   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  display_name text NOT NULL DEFAULT 'School Administrator',
+  display_name text NOT NULL DEFAULT 'Smt. G. Venkatasree, Principal',
   created_at timestamptz NOT NULL DEFAULT now()
 );
 

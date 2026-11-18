@@ -16,7 +16,7 @@ import { ContentEditor } from '@/components/admin/content-editor';
 import { LogOut, ExternalLink } from 'lucide-react';
 
 function DashboardInner() {
-  const { user, signOut } = useAdmin();
+  const { user, adminName, signOut } = useAdmin();
   const [tab, setTab] = useState('applications');
 
   return (
@@ -24,11 +24,11 @@ function DashboardInner() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            School admin
+            {adminName || 'Smt. G. Venkatasree, Principal'}
           </p>
           <h1 className="mt-1 font-serif text-3xl font-semibold">Content dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Signed in as {user?.email}. Manage online admission applications, inquiries, events, gallery, and staff.
+            Signed in as {adminName || 'Smt. G. Venkatasree, Principal'} ({user?.email}). Manage online admission applications, inquiries, events, gallery, and staff.
           </p>
         </div>
         <div className="flex items-center gap-2">
