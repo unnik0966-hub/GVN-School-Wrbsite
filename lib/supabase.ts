@@ -1,14 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 import { getFallbackContent } from './fallback-data';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').trim();
+const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').trim();
+
+const isPlaceholderCredentials =
+  supabaseUrl.includes('vgn-school.supabase.com') ||
+  supabaseUrl.includes('placeholder') ||
+  supabaseUrl.includes('example.com') ||
+  supabaseAnonKey === 'vgn-anon-key';
 
 const hasValidCredentials =
-  typeof supabaseUrl === 'string' &&
-  supabaseUrl.startsWith('http') &&
-  typeof supabaseAnonKey === 'string' &&
-  supabaseAnonKey.length > 10;
+  !isPlaceholderCredentials &&
+  supabaseUrl.startsWith('https://') &&
+  (supabaseAnonKey.startsWith('eyJ') ||
+    supabaseAnonKey.startsWith('sb_publishable_') ||
+    supabaseAnonKey.length > 40);
 
 // Default initial data for mock store
 const INITIAL_EVENTS = [
@@ -326,6 +333,9 @@ class MockSupabaseStore {
         if (saved) {
           const parsed = JSON.parse(saved);
           this.data = { ...this.data, ...parsed };
+          if (!Array.isArray(this.data.admin_profiles) || !this.data.admin_profiles.some((p: any) => p.user_id === 'mock-admin-id')) {
+            this.data.admin_profiles = [{ user_id: 'mock-admin-id', display_name: 'School Administrator' }, ...(this.data.admin_profiles || [])];
+          }
         }
         const savedUser = localStorage.getItem('vgn_mock_user');
         if (savedUser) {
@@ -407,6 +417,21 @@ function createQueryBuilder(table: string) {
     },
     execute: async () => {
       let list = [...(mockStore.data[table] || [])];
+      if (table === 'gallery_photos') {
+        const eventsById = new Map((mockStore.data.events || []).map((ev: any) => [ev.id, ev]));
+        list = list.map((item) => {
+          if (!item.event && item.event_id) {
+            const ev = eventsById.get(item.event_id);
+            if (ev) {
+              return {
+                ...item,
+                event: { id: ev.id, title: ev.title, slug: ev.slug, event_date: ev.event_date },
+              };
+            }
+          }
+          return item;
+        });
+      }
       for (const filter of filters) {
         list = list.filter(filter);
       }
@@ -557,27 +582,49 @@ const mockSupabase = {
       upload: async (path: string, file: File) => {
         let publicUrl = 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800';
         if (typeof window !== 'undefined' && file instanceof Blob) {
-          publicUrl = URL.createObjectURL(file);
+          publicUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : URL.createObjectURL(file));
+            reader.onerror = () => resolve(URL.createObjectURL(file));
+            reader.readAsDataURL(file);
+          });
+          mockStore.data.__uploads = mockStore.data.__uploads || [];
+          mockStore.data.__uploads = mockStore.data.__uploads.filter((u: any) => u.path !== path);
+          mockStore.data.__uploads.push({ path, publicUrl });
+          mockStore.save();
         }
         return {
           data: { path, publicUrl },
           error: null,
         };
       },
-      getPublicUrl: (path: string) => ({
-        data: {
-          publicUrl: path.startsWith('http')
-            ? path
-            : 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800',
-        },
-      }),
-      remove: async (_paths: string[]) => ({
-        data: [],
-        error: null,
-      }),
+      getPublicUrl: (path: string) => {
+        const stored = (mockStore.data.__uploads || []).find((u: any) => u.path === path);
+        return {
+          data: {
+            publicUrl: stored?.publicUrl
+              ? stored.publicUrl
+              : path.startsWith('http')
+                ? path
+                : 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800',
+          },
+        };
+      },
+      remove: async (paths: string[]) => {
+        if (mockStore.data.__uploads) {
+          mockStore.data.__uploads = mockStore.data.__uploads.filter((u: any) => !paths.includes(u.path));
+          mockStore.save();
+        }
+        return {
+          data: [],
+          error: null,
+        };
+      },
     }),
   },
 };
+
+export const isSupabaseConfigured = hasValidCredentials;
 
 // Export real Supabase client if configured, otherwise export seamless fallback
 export const supabase: any = hasValidCredentials

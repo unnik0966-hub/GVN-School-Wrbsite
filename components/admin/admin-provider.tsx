@@ -20,19 +20,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const refreshAdmin = useCallback(async (userId?: string) => {
-    const id = userId ?? session?.user?.id;
-    if (!id) {
+  const refreshAdmin = useCallback(async (userId?: string): Promise<boolean> => {
+    if (!userId) {
       setIsAdmin(false);
-      return;
+      return false;
     }
     const { data } = await supabase
       .from('admin_profiles')
       .select('user_id')
-      .eq('user_id', id)
+      .eq('user_id', userId)
       .maybeSingle();
-    setIsAdmin(Boolean(data));
-  }, [session?.user?.id]);
+    const ok = Boolean(data);
+    setIsAdmin(ok);
+    return ok;
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -63,10 +64,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [refreshAdmin]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: 'Invalid email or password.' };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      return { error: error.message || 'Invalid email or password.' };
+    }
+    const userId = data?.user?.id;
+    if (userId) {
+      const ok = await refreshAdmin(userId);
+      if (!ok) {
+        return { error: 'Signed in, but this account is not authorized in admin_profiles.' };
+      }
+    }
     return { error: null };
-  }, []);
+  }, [refreshAdmin]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();

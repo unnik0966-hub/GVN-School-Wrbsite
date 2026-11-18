@@ -24,7 +24,7 @@ export function GalleryManager() {
     supabase.from('events').select('id,title,published').order('event_date', { ascending: false })
   );
   const { rows, loading, error, reload } = useAdminList<PhotoRow>(() =>
-    supabase.from('gallery_photos').select('*, event:id(title)').order('created_at', { ascending: false })
+    supabase.from('gallery_photos').select('*, event:events(title)').order('created_at', { ascending: false })
   );
 
   const [eventId, setEventId] = useState('');

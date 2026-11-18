@@ -1,5 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const { PHASE_DEVELOPMENT_SERVER } = require('next/constants');
+
+/** @type {(phase: string) => import('next').NextConfig} */
+module.exports = (phase) => ({
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next-dev' : '.next',
   output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
@@ -8,8 +11,10 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['tailwind-merge'],
   },
-};
-
-module.exports = nextConfig;
-
-
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = { type: 'memory' };
+    }
+    return config;
+  },
+});

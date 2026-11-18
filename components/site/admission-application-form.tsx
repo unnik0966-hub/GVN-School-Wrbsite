@@ -61,7 +61,7 @@ const LEVEL_OPTIONS: Array<{
     id: 'higher_secondary',
     title: 'Higher Secondary School',
     subtitle: 'Classes XI & XII (Science & Commerce)',
-    grades: ['Class XI (Higher Secondary 1st Year)', 'Class XII (Higher Secondary 2nd Year)'],
+    grades: ['Class XI (Higher Secondary First Year)', 'Class XII (Higher Secondary Second Year)'],
     icon: Sparkles,
   },
 ];
@@ -118,6 +118,7 @@ export function AdmissionApplicationForm() {
     setErrorMsg('');
 
     if (!declarationAgreed) {
+      setStatus('error');
       setErrorMsg('Please confirm the declaration checkbox before submitting.');
       return;
     }
@@ -322,7 +323,7 @@ export function AdmissionApplicationForm() {
               const isSelected =
                 levelCategory === lvl.id &&
                 ((lvl.title.includes('Nursery') && selectedGrade.includes('KG')) ||
-                  (lvl.title.includes('Primary') && selectedGrade.includes('Class I')) ||
+                  (lvl.title.includes('Primary') && ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'].includes(selectedGrade)) ||
                   lvl.id === 'middle_school' ||
                   lvl.id === 'higher_secondary');
 

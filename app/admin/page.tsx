@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShieldCheck, Loader2, ArrowLeft, Lock } from 'lucide-react';
 import { Suspense } from 'react';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 function LoginForm() {
   const { signIn, session, isAdmin, loading } = useAdmin();
@@ -120,9 +121,15 @@ function LoginForm() {
             </p>
           )}
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Admin accounts are created by the school administration. There is no public sign-up.
-          </p>
+          {!isSupabaseConfigured ? (
+            <p className="mt-6 rounded-md bg-secondary/70 px-3 py-2 text-center text-xs text-muted-foreground">
+              Preview demo mode: enter any valid email (e.g. <span className="font-medium text-foreground">admin@vgnschool.edu.in</span>) and any password to access the dashboard.
+            </p>
+          ) : (
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              Admin accounts are created by the school administration. There is no public sign-up.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

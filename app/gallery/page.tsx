@@ -19,7 +19,7 @@ export default async function GalleryPage() {
   const { data } = await supabase
     .from('gallery_photos')
     .select(
-      'id, event_id, storage_path, public_url, caption, created_at, event:id ( id, title, slug, event_date )'
+      'id, event_id, storage_path, public_url, caption, created_at, event:events ( id, title, slug, event_date )'
     )
     .order('created_at', { ascending: false });
 
@@ -40,7 +40,7 @@ export default async function GalleryPage() {
     public_url: p.public_url,
     caption: p.caption,
     created_at: p.created_at,
-    event: Array.isArray(p.event) ? p.event[0] ?? null : null,
+    event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
   }));
 
   const events = Array.from(
