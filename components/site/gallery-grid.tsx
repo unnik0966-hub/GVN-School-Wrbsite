@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
 import { X } from 'lucide-react';
 
@@ -18,15 +19,46 @@ type GalleryGridProps = {
 };
 
 export function GalleryGrid({ photos, events }: GalleryGridProps) {
+  const [clientPhotos, setClientPhotos] = useState<GalleryPhotoWithEvent[]>(photos);
+  const [clientEvents, setClientEvents] = useState(events);
   const [activeEvent, setActiveEvent] = useState<string>('all');
   const [lightbox, setLightbox] = useState<GalleryPhotoWithEvent | null>(null);
+
+  useEffect(() => {
+    setClientPhotos(photos);
+    setClientEvents(events);
+  }, [photos, events]);
+
+  useEffect(() => {
+    if (isSupabaseConfigured) return;
+    let active = true;
+    supabase
+      .from('gallery_photos')
+      .select('id, event_id, storage_path, public_url, caption, created_at')
+      .order('created_at', { ascending: false })
+      .then(({ data }: { data: GalleryPhotoWithEvent[] | null }) => {
+        if (!active || !data) return;
+        setClientPhotos(data);
+        const derivedEvents = Array.from(
+          new Map(
+            data
+              .filter((p) => p.event)
+              .map((p) => [p.event!.id, p.event!])
+          ).values()
+        ).sort((a, b) => a.title.localeCompare(b.title));
+        setClientEvents(derivedEvents);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filtered = useMemo(
     () =>
       activeEvent === 'all'
-        ? photos
-        : photos.filter((p) => p.event_id === activeEvent),
-    [photos, activeEvent]
+        ? clientPhotos
+        : clientPhotos.filter((p) => p.event_id === activeEvent),
+    [clientPhotos, activeEvent]
   );
 
   return (
@@ -38,7 +70,7 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
         >
           All photos
         </FilterButton>
-        {events.map((event) => (
+        {clientEvents.map((event) => (
           <FilterButton
             key={event.id}
             active={activeEvent === event.id}

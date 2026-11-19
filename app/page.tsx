@@ -8,6 +8,8 @@ import { HighlightCard } from '@/components/site/highlight-card';
 import { SectionHeading } from '@/components/site/section-heading';
 import { formatDate } from '@/lib/format';
 
+export const dynamic = 'force-dynamic';
+
 const ICON_MAP: Record<string, typeof ArrowRight> = {
   GraduationCap,
   FlaskConical,
