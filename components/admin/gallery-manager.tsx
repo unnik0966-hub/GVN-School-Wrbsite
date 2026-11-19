@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { GALLERY_CATEGORIES, isGalleryCategorySlug } from '@/lib/gallery-categories';
+import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,7 +37,6 @@ export function GalleryManager() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const publishedEvents = events.filter((e) => e.published);
-  const customPublishedEvents = publishedEvents.filter((e) => !isGalleryCategorySlug(e.slug));
 
   async function resolveEventId(choice: string): Promise<string | null> {
     if (!choice.startsWith('category:')) {
@@ -165,26 +164,15 @@ export function GalleryManager() {
                 value={selectedTarget}
                 onChange={(e) => setSelectedTarget(e.target.value)}
               >
-                <option value="">Select event / category</option>
-                <optgroup label="Gallery Categories">
-                  {GALLERY_CATEGORIES.map((cat) => {
-                    const matched = publishedEvents.find((ev) => ev.slug === cat.slug);
-                    return (
-                      <option key={cat.slug} value={matched ? matched.id : `category:${cat.slug}`}>
-                        {cat.title}
-                      </option>
-                    );
-                  })}
-                </optgroup>
-                {customPublishedEvents.length > 0 && (
-                  <optgroup label="School Events">
-                    {customPublishedEvents.map((ev) => (
-                      <option key={ev.id} value={ev.id}>
-                        {ev.title}
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
+                <option value="">Select category</option>
+                {GALLERY_CATEGORIES.map((cat) => {
+                  const matched = publishedEvents.find((ev) => ev.slug === cat.slug);
+                  return (
+                    <option key={cat.slug} value={matched ? matched.id : `category:${cat.slug}`}>
+                      {cat.title}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div>

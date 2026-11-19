@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 import { Mail, Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
+import { GALLERY_CATEGORIES, isGalleryCategorySlug } from '@/lib/gallery-categories';
 import type { SchoolEvent } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { GalleryGrid } from '@/components/site/gallery-grid';
 
 export const metadata: Metadata = {
   title: 'Photo Gallery',
-  description: 'Moments, celebrations, and campus life at Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+  description: 'Annual Day moments and highlights across school categories at Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
   alternates: {
     canonical: '/gallery',
   },
@@ -43,53 +43,40 @@ export default async function GalleryPage() {
       | null;
   }>;
 
-  const photos = rawPhotos.map((p) => ({
-    id: p.id,
-    event_id: p.event_id,
-    storage_path: p.storage_path,
-    public_url: p.public_url,
-    caption: p.caption,
-    created_at: p.created_at,
-    event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
-  }));
+  const categoryIdSet = new Set<string>(GALLERY_CATEGORIES.map((c) => c.id));
 
-  const eventMap = new Map<string, Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>>();
+  const photos = rawPhotos
+    .map((p) => ({
+      id: p.id,
+      event_id: p.event_id,
+      storage_path: p.storage_path,
+      public_url: p.public_url,
+      caption: p.caption,
+      created_at: p.created_at,
+      event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
+    }))
+    .filter((p) => isGalleryCategorySlug(p.event?.slug) || categoryIdSet.has(p.event_id));
+
   const publishedList = (dbEvents ?? []) as Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>[];
-
-  for (const cat of GALLERY_CATEGORIES) {
+  const events: Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>[] = GALLERY_CATEGORIES.map((cat) => {
     const matched = publishedList.find((ev) => ev.slug === cat.slug);
-    const key = matched ? matched.id : cat.slug;
-    eventMap.set(key, {
-      id: key,
+    return {
+      id: matched ? matched.id : cat.slug,
       title: cat.title,
       slug: cat.slug,
-      event_date: matched?.event_date ?? '',
-    });
-  }
-
-  for (const p of photos) {
-    if (p.event && !Array.from(eventMap.values()).some((e) => e.slug === p.event!.slug || e.id === p.event!.id)) {
-      eventMap.set(p.event.id, p.event);
-    }
-  }
-
-  const events = Array.from(eventMap.values());
+      event_date: '',
+    };
+  });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <SectionHeading
-        eyebrow="Moments"
+        eyebrow="Annual Day"
         title="Gallery"
-        description="Photos from school events, curated by our staff. Filter by event to explore."
+        description="Annual Day moments curated by our staff. Filter by category to explore."
       />
 
-      {photos.length > 0 ? (
-        <GalleryGrid photos={photos} events={events} />
-      ) : (
-        <p className="mt-12 rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          The gallery will be updated as event photos are published by our staff.
-        </p>
-      )}
+      <GalleryGrid photos={photos} events={events} />
 
       <div className="mt-16 rounded-2xl border border-border bg-gradient-to-br from-card to-secondary/40 p-8 sm:p-10">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-8">

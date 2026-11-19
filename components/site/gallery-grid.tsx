@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
-import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
+import { GALLERY_CATEGORIES, isGalleryCategorySlug } from '@/lib/gallery-categories';
 import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
 import { X } from 'lucide-react';
 
@@ -24,8 +24,10 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
   const [clientEvents, setClientEvents] = useState(events);
   const [activeEvent, setActiveEvent] = useState<string>('all');
   const [lightbox, setLightbox] = useState<GalleryPhotoWithEvent | null>(null);
+  const eventsRef = useRef(events);
 
   useEffect(() => {
+    eventsRef.current = events;
     setClientPhotos(photos);
     setClientEvents(events);
   }, [photos, events]);
@@ -38,32 +40,29 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
       .order('created_at', { ascending: false })
       .then(({ data }: { data: any[] | null }) => {
         if (!active || !data) return;
-        const normalized: GalleryPhotoWithEvent[] = data.map((p) => ({
-          id: p.id,
-          event_id: p.event_id,
-          public_url: p.public_url,
-          caption: p.caption,
-          created_at: p.created_at,
-          event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
-        }));
+        const categoryIdSet = new Set<string>(GALLERY_CATEGORIES.map((c) => c.id));
+        const normalized: GalleryPhotoWithEvent[] = data
+          .map((p) => ({
+            id: p.id,
+            event_id: p.event_id,
+            public_url: p.public_url,
+            caption: p.caption,
+            created_at: p.created_at,
+            event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
+          }))
+          .filter((p) => isGalleryCategorySlug(p.event?.slug) || categoryIdSet.has(p.event_id));
         setClientPhotos(normalized);
-        const eventMap = new Map<string, Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>>();
-        for (const cat of GALLERY_CATEGORIES) {
+        const categoryEvents = GALLERY_CATEGORIES.map((cat) => {
           const matched = normalized.find((p) => p.event?.slug === cat.slug)?.event;
-          const key = matched ? matched.id : cat.slug;
-          eventMap.set(key, {
-            id: key,
+          const fallback = eventsRef.current.find((e) => e.slug === cat.slug);
+          return {
+            id: matched ? matched.id : fallback ? fallback.id : cat.slug,
             title: cat.title,
             slug: cat.slug,
-            event_date: matched?.event_date ?? '',
-          });
-        }
-        for (const p of normalized) {
-          if (p.event && !Array.from(eventMap.values()).some((e) => e.slug === p.event!.slug || e.id === p.event!.id)) {
-            eventMap.set(p.event.id, p.event);
-          }
-        }
-        setClientEvents(Array.from(eventMap.values()));
+            event_date: '',
+          };
+        });
+        setClientEvents(categoryEvents);
       });
     return () => {
       active = false;
@@ -112,7 +111,7 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.public_url}
-                alt={photo.caption || 'School event photo'}
+                alt={photo.caption || 'Annual Day photo'}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -150,12 +149,12 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={lightbox.public_url}
-              alt={lightbox.caption || 'School event photo'}
+              alt={lightbox.caption || 'Annual Day photo'}
               className="max-h-[80vh] w-full object-contain"
             />
             <figcaption className="flex items-center justify-between gap-4 px-5 py-4 text-sm">
               <span className="text-muted-foreground">
-                {lightbox.event?.title ?? 'School event'}
+                {lightbox.event?.title ?? 'Annual Day'}
               </span>
               {lightbox.caption && (
                 <span className="font-medium">{lightbox.caption}</span>

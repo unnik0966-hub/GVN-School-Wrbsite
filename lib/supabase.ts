@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { getFallbackContent } from './fallback-data';
-import { GALLERY_CATEGORIES } from './gallery-categories';
+import { GALLERY_CATEGORIES, isGalleryCategorySlug } from './gallery-categories';
 
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').trim();
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').trim();
@@ -18,69 +18,19 @@ const hasValidCredentials =
     supabaseAnonKey.startsWith('sb_publishable_') ||
     supabaseAnonKey.length > 40);
 
-// Default initial data for mock store
-const INITIAL_EVENTS = [
-  {
-    id: 'e1001',
-    title: 'Annual Sports Day 2025',
-    slug: 'annual-sports-day-2025',
-    event_date: '2025-09-20',
-    description: 'A day of track and field athletics, house march-past, drill displays, and medal ceremonies celebrating sportsmanship.',
-    location: 'School Sports Complex',
-    cover_image_url: 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800',
-    published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'e1002',
-    title: 'Cultural Evening & Talents Day',
-    slug: 'cultural-evening-talents-day',
-    event_date: '2025-10-15',
-    description: 'An evening of classical music, folk dance, drama, and student performances showcasing the artistic brilliance of our students.',
-    location: 'Main Auditorium',
-    cover_image_url: 'https://images.pexels.com/photos/1047442/pexels-photo-1047442.jpeg?auto=compress&cs=tinysrgb&w=800',
-    published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'e1003',
-    title: 'State Level Open Speed Skating Championship',
-    slug: 'state-level-open-speed-skating-championship',
-    event_date: '2025-11-05',
-    description: 'Our champions glided to glory winning 6 Gold, 7 Silver, and 8 Bronze medals at the state tournament.',
-    location: 'District Skating Arena',
-    cover_image_url: 'https://images.pexels.com/photos/2005992/pexels-photo-2005992.jpeg?auto=compress&cs=tinysrgb&w=800',
-    published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'e1004',
-    title: 'Science & Innovation Expo 2025',
-    slug: 'science-innovation-expo-2025',
-    event_date: '2025-12-10',
-    description: 'Student-built working models, robotics showcases, and interactive chemistry demonstrations across all grades.',
-    location: 'Science Laboratory Block',
-    cover_image_url: 'https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=800',
-    published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  ...GALLERY_CATEGORIES.map((cat) => ({
-    id: cat.id,
-    title: cat.title,
-    slug: cat.slug,
-    event_date: new Date().toISOString().slice(0, 10),
-    description: `${cat.title} photo gallery collection`,
-    location: 'School Campus',
-    cover_image_url: null,
-    published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  })),
-];
+// Default initial data for mock store (existing gallery categories only; School Events entries removed)
+const INITIAL_EVENTS = GALLERY_CATEGORIES.map((cat) => ({
+  id: cat.id,
+  title: cat.title,
+  slug: cat.slug,
+  event_date: '',
+  description: `Annual Day — ${cat.title} photo gallery collection`,
+  location: 'School Campus',
+  cover_image_url: null,
+  published: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+}));
 
 const INITIAL_ANNOUNCEMENTS = [
   {
@@ -189,40 +139,76 @@ const INITIAL_STAFF = [
 
 const INITIAL_GALLERY = [
   {
-    id: 'g1001',
-    event_id: 'e1001',
-    storage_path: 'mock/annual_sports.jpg',
-    public_url: 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800',
-    caption: 'March past salute by the senior student council at Sports Day',
+    id: 'g-annual-events',
+    event_id: 'cat-events',
+    storage_path: 'annual-day/events.jpg',
+    public_url: '/images/gallery/annual-day-events.jpg',
+    caption: 'Annual Day inaugural lamp lighting ceremony on stage',
     created_at: new Date().toISOString(),
-    event: { id: 'e1001', title: 'Annual Sports Day 2025', slug: 'annual-sports-day-2025', event_date: '2025-09-20' },
+    event: { id: 'cat-events', title: 'Events', slug: 'gallery-category-events', event_date: '' },
   },
   {
-    id: 'g1002',
-    event_id: 'e1002',
-    storage_path: 'mock/cultural_fest.jpg',
-    public_url: 'https://images.pexels.com/photos/1047442/pexels-photo-1047442.jpeg?auto=compress&cs=tinysrgb&w=800',
-    caption: 'Classical dance performance during Cultural Talents Day',
+    id: 'g-annual-campus-life',
+    event_id: 'cat-campus-life',
+    storage_path: 'annual-day/campus-life.jpg',
+    public_url: '/images/gallery/annual-day-campus-life.jpg',
+    caption: 'Students gathering across the decorated campus for Annual Day',
     created_at: new Date().toISOString(),
-    event: { id: 'e1002', title: 'Cultural Evening & Talents Day', slug: 'cultural-evening-talents-day', event_date: '2025-10-15' },
+    event: { id: 'cat-campus-life', title: 'Campus Life', slug: 'gallery-category-campus-life', event_date: '' },
   },
   {
-    id: 'g1003',
-    event_id: 'e1003',
-    storage_path: 'mock/skating_championship.jpg',
-    public_url: 'https://images.pexels.com/photos/2005992/pexels-photo-2005992.jpeg?auto=compress&cs=tinysrgb&w=800',
-    caption: 'State Level Speed Skating medal winners with the rolling trophy',
+    id: 'g-annual-celebrations',
+    event_id: 'cat-celebrations',
+    storage_path: 'annual-day/celebrations.jpg',
+    public_url: '/images/gallery/annual-day-celebrations.jpg',
+    caption: 'Annual Day grand finale celebration in the school auditorium',
     created_at: new Date().toISOString(),
-    event: { id: 'e1003', title: 'State Level Open Speed Skating Championship', slug: 'state-level-open-speed-skating-championship', event_date: '2025-11-05' },
+    event: { id: 'cat-celebrations', title: 'Celebrations', slug: 'gallery-category-celebrations', event_date: '' },
   },
   {
-    id: 'g1004',
-    event_id: 'e1004',
-    storage_path: 'mock/science_lab.jpg',
-    public_url: 'https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=800',
-    caption: 'Hands-on physics and chemistry exhibits during Science Expo',
+    id: 'g-annual-achievements',
+    event_id: 'cat-achievements',
+    storage_path: 'annual-day/achievements.jpg',
+    public_url: '/images/gallery/annual-day-achievements.jpg',
+    caption: 'Annual Day prize distribution and excellence trophy presentation',
     created_at: new Date().toISOString(),
-    event: { id: 'e1004', title: 'Science & Innovation Expo 2025', slug: 'science-innovation-expo-2025', event_date: '2025-12-10' },
+    event: { id: 'cat-achievements', title: 'Achievements', slug: 'gallery-category-achievements', event_date: '' },
+  },
+  {
+    id: 'g-annual-activities',
+    event_id: 'cat-activities',
+    storage_path: 'annual-day/activities.jpg',
+    public_url: '/images/gallery/annual-day-activities.jpg',
+    caption: 'Annual Day student folk drama and choral showcase',
+    created_at: new Date().toISOString(),
+    event: { id: 'cat-activities', title: 'Activities', slug: 'gallery-category-activities', event_date: '' },
+  },
+  {
+    id: 'g-annual-academics',
+    event_id: 'cat-academics',
+    storage_path: 'annual-day/academics.jpg',
+    public_url: '/images/gallery/annual-day-academics.jpg',
+    caption: 'Annual Day academic proficiency medalists and faculty on stage',
+    created_at: new Date().toISOString(),
+    event: { id: 'cat-academics', title: 'Academics', slug: 'gallery-category-academics', event_date: '' },
+  },
+  {
+    id: 'g-annual-sports-fitness',
+    event_id: 'cat-sports-fitness',
+    storage_path: 'annual-day/sports-fitness.jpg',
+    public_url: '/images/gallery/annual-day-sports-fitness.jpg',
+    caption: 'Annual Day rhythmic mass drill and house march-past display',
+    created_at: new Date().toISOString(),
+    event: { id: 'cat-sports-fitness', title: 'Sports & Fitness', slug: 'gallery-category-sports-fitness', event_date: '' },
+  },
+  {
+    id: 'g-annual-arts-culture',
+    event_id: 'cat-arts-culture',
+    storage_path: 'annual-day/arts-culture.jpg',
+    public_url: '/images/gallery/annual-day-arts-culture.jpg',
+    caption: 'Annual Day classical Bharatanatyam dance presentation',
+    created_at: new Date().toISOString(),
+    event: { id: 'cat-arts-culture', title: 'Arts & Culture', slug: 'gallery-category-arts-culture', event_date: '' },
   },
 ];
 
@@ -349,24 +335,37 @@ class MockSupabaseStore {
           if (!Array.isArray(this.data.events)) {
             this.data.events = [...INITIAL_EVENTS];
           } else {
-            const existingSlugs = new Set(this.data.events.map((ev: any) => ev.slug));
+            // Remove all School Events entries and ensure all 8 gallery categories exist
+            const categoryEventsOnly = this.data.events.filter((ev: any) => isGalleryCategorySlug(ev.slug));
+            const existingSlugs = new Set(categoryEventsOnly.map((ev: any) => ev.slug));
             const missingCategoryEvents = GALLERY_CATEGORIES
               .filter((cat) => !existingSlugs.has(cat.slug))
               .map((cat) => ({
                 id: cat.id,
                 title: cat.title,
                 slug: cat.slug,
-                event_date: new Date().toISOString().slice(0, 10),
-                description: `${cat.title} photo gallery collection`,
+                event_date: '',
+                description: `Annual Day — ${cat.title} photo gallery collection`,
                 location: 'School Campus',
                 cover_image_url: null,
                 published: true,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               }));
-            if (missingCategoryEvents.length > 0) {
-              this.data.events = [...this.data.events, ...missingCategoryEvents];
-            }
+            this.data.events = [...categoryEventsOnly, ...missingCategoryEvents];
+          }
+
+          if (!parsed.__annual_day_only_v1) {
+            const categoryIds = new Set(GALLERY_CATEGORIES.map((c) => c.id));
+            const customCategoryPhotos = (Array.isArray(this.data.gallery_photos) ? this.data.gallery_photos : []).filter(
+              (p: any) =>
+                categoryIds.has(p.event_id) &&
+                !String(p.id || '').startsWith('g100') &&
+                !String(p.id || '').startsWith('g-annual-')
+            );
+            this.data.gallery_photos = [...customCategoryPhotos, ...INITIAL_GALLERY];
+            (this.data as any).__annual_day_only_v1 = true;
+            this.save();
           }
           if (!Array.isArray(this.data.admin_profiles) || !this.data.admin_profiles.some((p: any) => p.user_id === 'mock-admin-id')) {
             this.data.admin_profiles = [{ user_id: 'mock-admin-id', display_name: 'Smt. G. Venkatasree, Principal' }, ...(this.data.admin_profiles || [])];
