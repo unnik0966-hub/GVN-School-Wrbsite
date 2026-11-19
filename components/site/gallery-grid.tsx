@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
 import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
 import { X } from 'lucide-react';
 
@@ -39,14 +40,21 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
       .then(({ data }: { data: GalleryPhotoWithEvent[] | null }) => {
         if (!active || !data) return;
         setClientPhotos(data);
-        const derivedEvents = Array.from(
-          new Map(
-            data
-              .filter((p) => p.event)
-              .map((p) => [p.event!.id, p.event!])
-          ).values()
-        ).sort((a, b) => a.title.localeCompare(b.title));
-        setClientEvents(derivedEvents);
+        const eventMap = new Map<string, Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>>();
+        for (const cat of GALLERY_CATEGORIES) {
+          eventMap.set(cat.id, {
+            id: cat.id,
+            title: cat.title,
+            slug: cat.slug,
+            event_date: '',
+          });
+        }
+        for (const p of data) {
+          if (p.event && !Array.from(eventMap.values()).some((e) => e.slug === p.event!.slug || e.id === p.event!.id)) {
+            eventMap.set(p.event.id, p.event);
+          }
+        }
+        setClientEvents(Array.from(eventMap.values()));
       });
     return () => {
       active = false;
@@ -57,7 +65,9 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
     () =>
       activeEvent === 'all'
         ? clientPhotos
-        : clientPhotos.filter((p) => p.event_id === activeEvent),
+        : clientPhotos.filter(
+            (p) => p.event_id === activeEvent || p.event?.slug === activeEvent
+          ),
     [clientPhotos, activeEvent]
   );
 
@@ -81,29 +91,35 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
         ))}
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {filtered.map((photo) => (
-          <button
-            key={photo.id}
-            type="button"
-            onClick={() => setLightbox(photo)}
-            className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-secondary shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={photo.public_url}
-              alt={photo.caption || 'School event photo'}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 transition-opacity group-hover:opacity-100" />
-            {photo.caption && (
-              <p className="absolute inset-x-0 bottom-0 p-3 text-left text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
-                {photo.caption}
-              </p>
-            )}
-          </button>
-        ))}
-      </div>
+      {filtered.length > 0 ? (
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {filtered.map((photo) => (
+            <button
+              key={photo.id}
+              type="button"
+              onClick={() => setLightbox(photo)}
+              className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-secondary shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photo.public_url}
+                alt={photo.caption || 'School event photo'}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 transition-opacity group-hover:opacity-100" />
+              {photo.caption && (
+                <p className="absolute inset-x-0 bottom-0 p-3 text-left text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  {photo.caption}
+                </p>
+              )}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-8 rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+          No photos have been uploaded in this category yet.
+        </p>
+      )}
 
       {lightbox && (
         <div

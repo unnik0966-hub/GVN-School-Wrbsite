@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { getFallbackContent } from './fallback-data';
+import { GALLERY_CATEGORIES } from './gallery-categories';
 
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').trim();
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').trim();
@@ -67,6 +68,18 @@ const INITIAL_EVENTS = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  ...GALLERY_CATEGORIES.map((cat) => ({
+    id: cat.id,
+    title: cat.title,
+    slug: cat.slug,
+    event_date: new Date().toISOString().slice(0, 10),
+    description: `${cat.title} photo gallery collection`,
+    location: 'School Campus',
+    cover_image_url: null,
+    published: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  })),
 ];
 
 const INITIAL_ANNOUNCEMENTS = [
@@ -333,6 +346,28 @@ class MockSupabaseStore {
         if (saved) {
           const parsed = JSON.parse(saved);
           this.data = { ...this.data, ...parsed };
+          if (!Array.isArray(this.data.events)) {
+            this.data.events = [...INITIAL_EVENTS];
+          } else {
+            const existingSlugs = new Set(this.data.events.map((ev: any) => ev.slug));
+            const missingCategoryEvents = GALLERY_CATEGORIES
+              .filter((cat) => !existingSlugs.has(cat.slug))
+              .map((cat) => ({
+                id: cat.id,
+                title: cat.title,
+                slug: cat.slug,
+                event_date: new Date().toISOString().slice(0, 10),
+                description: `${cat.title} photo gallery collection`,
+                location: 'School Campus',
+                cover_image_url: null,
+                published: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              }));
+            if (missingCategoryEvents.length > 0) {
+              this.data.events = [...this.data.events, ...missingCategoryEvents];
+            }
+          }
           if (!Array.isArray(this.data.admin_profiles) || !this.data.admin_profiles.some((p: any) => p.user_id === 'mock-admin-id')) {
             this.data.admin_profiles = [{ user_id: 'mock-admin-id', display_name: 'Smt. G. Venkatasree, Principal' }, ...(this.data.admin_profiles || [])];
           } else {
@@ -452,18 +487,35 @@ function createQueryBuilder(table: string) {
     then: (resolve: any, reject: any) => {
       return builder.execute().then(resolve, reject);
     },
-    insert: async (payload: any) => {
-      const items = Array.isArray(payload) ? payload : [payload];
-      const inserted = items.map((item) => ({
-        id: item.id || `mock-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        ...item,
-      }));
-      if (!mockStore.data[table]) mockStore.data[table] = [];
-      mockStore.data[table].unshift(...inserted);
-      mockStore.save();
-      return { data: Array.isArray(payload) ? inserted : inserted[0], error: null };
+    insert: (payload: any) => {
+      const runInsert = async () => {
+        const items = Array.isArray(payload) ? payload : [payload];
+        const inserted = items.map((item) => ({
+          id: item.id || `mock-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          ...item,
+        }));
+        if (!mockStore.data[table]) mockStore.data[table] = [];
+        mockStore.data[table].unshift(...inserted);
+        mockStore.save();
+        return { data: Array.isArray(payload) ? inserted : inserted[0], error: null };
+      };
+      let promise: Promise<any> | null = null;
+      const exec = () => (promise ??= runInsert());
+      const insertBuilder: any = {
+        select: (_cols?: string) => insertBuilder,
+        single: async () => {
+          const res = await exec();
+          return { data: Array.isArray(res.data) ? res.data[0] : res.data, error: res.error };
+        },
+        maybeSingle: async () => {
+          const res = await exec();
+          return { data: Array.isArray(res.data) ? res.data[0] ?? null : res.data ?? null, error: res.error };
+        },
+        then: (resolve: any, reject: any) => exec().then(resolve, reject),
+      };
+      return insertBuilder;
     },
     upsert: async (payload: any, options?: { onConflict?: string }) => {
       const items = Array.isArray(payload) ? payload : [payload];

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { SchoolEvent } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { formatDate } from '@/lib/format';
+import { isGalleryCategorySlug } from '@/lib/gallery-categories';
 import { CalendarDays, MapPin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -22,10 +23,10 @@ export default async function EventsPage() {
     .eq('published', true)
     .order('event_date', { ascending: true });
 
-  const events = (data ?? []) as Pick<
+  const events = ((data ?? []) as Pick<
     SchoolEvent,
     'id' | 'title' | 'slug' | 'event_date' | 'description' | 'location' | 'cover_image_url'
-  >[];
+  >[]).filter((e) => !isGalleryCategorySlug(e.slug));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

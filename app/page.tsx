@@ -7,6 +7,7 @@ import { HeroSection } from '@/components/site/hero-section';
 import { HighlightCard } from '@/components/site/highlight-card';
 import { SectionHeading } from '@/components/site/section-heading';
 import { formatDate } from '@/lib/format';
+import { isGalleryCategorySlug } from '@/lib/gallery-categories';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +26,14 @@ export default async function Home() {
   const quickLinks = Array.isArray(home.quick_links) ? home.quick_links : [];
 
   const today = new Date().toISOString().slice(0, 10);
-  const [{ data: events }, { data: announcements }] = await Promise.all([
+  const [{ data: rawEvents }, { data: announcements }] = await Promise.all([
     supabase
       .from('events')
       .select('id, title, slug, event_date, description, location, cover_image_url')
       .eq('published', true)
       .gte('event_date', today)
       .order('event_date', { ascending: true })
-      .limit(3),
+      .limit(12),
     supabase
       .from('announcements')
       .select('id, title, body, publish_date')
@@ -41,6 +42,9 @@ export default async function Home() {
       .order('publish_date', { ascending: false })
       .limit(3),
   ]);
+  const events = (rawEvents ?? [])
+    .filter((e: any) => !isGalleryCategorySlug(e.slug))
+    .slice(0, 3);
 
   return (
     <div>

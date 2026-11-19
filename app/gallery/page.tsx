@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Mail, Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
+import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
+import type { SchoolEvent } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { GalleryGrid } from '@/components/site/gallery-grid';
 
@@ -18,12 +19,18 @@ export const metadata: Metadata = {
 const GALLERY_EMAIL = 'vgnprincipal@gmail.com';
 
 export default async function GalleryPage() {
-  const { data } = await supabase
-    .from('gallery_photos')
-    .select(
-      'id, event_id, storage_path, public_url, caption, created_at, event:events ( id, title, slug, event_date )'
-    )
-    .order('created_at', { ascending: false });
+  const [{ data }, { data: dbEvents }] = await Promise.all([
+    supabase
+      .from('gallery_photos')
+      .select(
+        'id, event_id, storage_path, public_url, caption, created_at, event:events ( id, title, slug, event_date )'
+      )
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('events')
+      .select('id, title, slug, event_date')
+      .eq('published', true),
+  ]);
 
   const rawPhotos = (data ?? []) as unknown as Array<{
     id: string;
@@ -32,7 +39,10 @@ export default async function GalleryPage() {
     public_url: string;
     caption: string;
     created_at: string;
-    event: Array<Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>> | null;
+    event:
+      | Array<Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>>
+      | Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>
+      | null;
   }>;
 
   const photos = rawPhotos.map((p) => ({
@@ -45,13 +55,27 @@ export default async function GalleryPage() {
     event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
   }));
 
-  const events = Array.from(
-    new Map(
-      photos
-        .filter((p) => p.event)
-        .map((p) => [p.event!.id, p.event!])
-    ).values()
-  ).sort((a, b) => a.title.localeCompare(b.title));
+  const eventMap = new Map<string, Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>>();
+  const publishedList = (dbEvents ?? []) as Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>[];
+
+  for (const cat of GALLERY_CATEGORIES) {
+    const matched = publishedList.find((ev) => ev.slug === cat.slug);
+    const key = matched ? matched.id : cat.slug;
+    eventMap.set(key, {
+      id: key,
+      title: cat.title,
+      slug: cat.slug,
+      event_date: matched?.event_date ?? '',
+    });
+  }
+
+  for (const p of photos) {
+    if (p.event && !Array.from(eventMap.values()).some((e) => e.slug === p.event!.slug || e.id === p.event!.id)) {
+      eventMap.set(p.event.id, p.event);
+    }
+  }
+
+  const events = Array.from(eventMap.values());
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

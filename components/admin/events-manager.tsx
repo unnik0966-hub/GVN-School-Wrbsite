@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAdminList, LoadingState, ErrorState, EmptyState } from './admin-ui';
+import { isGalleryCategorySlug } from '@/lib/gallery-categories';
 import { Pencil, Trash2, Save } from 'lucide-react';
 
 type EventRow = {
@@ -23,9 +24,10 @@ type EventRow = {
 const empty = { title: '', slug: '', event_date: '', description: '', location: '', published: false };
 
 export function EventsManager() {
-  const { rows, loading, error, reload } = useAdminList<EventRow>(() =>
+  const { rows: allRows, loading, error, reload } = useAdminList<EventRow>(() =>
     supabase.from('events').select('*').order('event_date', { ascending: false })
   );
+  const rows = allRows.filter((r) => !isGalleryCategorySlug(r.slug));
 
   const [form, setForm] = useState(empty);
   const [editing, setEditing] = useState<string | null>(null);
