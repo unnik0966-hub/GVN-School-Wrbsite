@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/lib/supabase';
 import type { AdmissionLevelCategory, AdmissionApplication } from '@/lib/types';
 import {
   Baby,
@@ -161,19 +162,120 @@ export function AdmissionApplicationForm() {
     };
 
     try {
-      const res = await fetch('/api/admissions/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      let applicationResult: AdmissionApplication | null = null;
+      let shouldFallbackToClient = false;
 
-      const data = await res.json();
+      try {
+        const res = await fetch('/api/admissions/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit admission application.');
+        const contentType = res.headers.get('content-type') || '';
+        if (res.status === 404 || res.status === 405 || !contentType.includes('application/json')) {
+          shouldFallbackToClient = true;
+        } else {
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to submit admission application.');
+          }
+          applicationResult = data.application;
+        }
+      } catch (fetchErr: any) {
+        if (fetchErr instanceof TypeError) {
+          shouldFallbackToClient = true;
+        } else {
+          throw fetchErr;
+        }
       }
 
-      setSubmittedData(data.application);
+      if (shouldFallbackToClient) {
+        if (
+          !payload.student_name ||
+          !payload.date_of_birth ||
+          !payload.grade_applying ||
+          !payload.father_name ||
+          !payload.father_phone ||
+          !payload.primary_email ||
+          !payload.residential_address ||
+          !payload.city ||
+          !payload.pincode
+        ) {
+          throw new Error(
+            'Please fill in all mandatory fields (Student name, Date of birth, Grade applying, Father details, Primary email, and Address).'
+          );
+        }
+
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        const application_no = `VGN-ADM-2025-${randomSuffix}`;
+        const recipient_email = 'vgnprincipal@gmail.com';
+
+        applicationResult = {
+          id: `app-${Date.now()}-${randomSuffix}`,
+          application_no,
+          academic_year: payload.academic_year || '2025–2026',
+          level_category: payload.level_category,
+          grade_applying: payload.grade_applying,
+          stream:
+            payload.stream ||
+            (payload.level_category === 'higher_secondary'
+              ? 'Science / Commerce Group'
+              : 'General Curriculum'),
+          student_name: payload.student_name,
+          date_of_birth: payload.date_of_birth,
+          gender: (payload.gender || 'Male') as 'Male' | 'Female' | 'Other',
+          blood_group: payload.blood_group || 'Not Specified',
+          nationality: payload.nationality || 'Indian',
+          mother_tongue: payload.mother_tongue || 'Tamil',
+          aadhaar_no: payload.aadhaar_no || undefined,
+          previous_school: payload.previous_school || undefined,
+          previous_grade: payload.previous_grade || undefined,
+          medium_of_instruction: payload.medium_of_instruction || 'English',
+          father_name: payload.father_name,
+          father_occupation: payload.father_occupation || undefined,
+          father_phone: payload.father_phone,
+          mother_name: payload.mother_name,
+          mother_occupation: payload.mother_occupation || undefined,
+          mother_phone: payload.mother_phone || payload.father_phone,
+          guardian_name: payload.guardian_name || undefined,
+          guardian_phone: payload.guardian_phone || undefined,
+          primary_email: payload.primary_email,
+          residential_address: payload.residential_address,
+          city: payload.city,
+          pincode: payload.pincode,
+          district: payload.district || 'Coimbatore',
+          state: payload.state || 'Tamil Nadu',
+          transport_required: Boolean(payload.transport_required),
+          transport_pickup_location: payload.transport_pickup_location || undefined,
+          medical_notes: payload.medical_notes || undefined,
+          status: 'submitted',
+          email_sent_to_school: false,
+          recipient_email,
+          created_at: new Date().toISOString(),
+        };
+
+        await supabase.from('admissions_applications').insert(applicationResult);
+        const { error: inquiryErr } = await supabase.from('admissions_inquiries').insert({
+          parent_name: `${payload.father_name} / ${payload.mother_name}`,
+          email: payload.primary_email,
+          phone: payload.father_phone,
+          student_name: payload.student_name,
+          grade: `${payload.grade_applying} ${payload.stream ? `(${payload.stream})` : ''}`.trim(),
+          message: `[ONLINE ADMISSION FORM: ${application_no}] Level: ${payload.level_category}. Address: ${payload.residential_address}, ${payload.city} - ${payload.pincode}. Transport: ${payload.transport_required ? 'Yes' : 'No'}.`,
+          status: 'new',
+        });
+
+        if (inquiryErr) {
+          throw new Error(inquiryErr.message || 'Failed to save admission application.');
+        }
+      }
+
+      if (!applicationResult) {
+        throw new Error('Failed to submit admission application.');
+      }
+
+      setSubmittedData(applicationResult);
       setStatus('success');
     } catch (err: any) {
       console.error(err);

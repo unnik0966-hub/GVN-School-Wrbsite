@@ -4,8 +4,6 @@ import { SectionHeading } from '@/components/site/section-heading';
 import { AdmissionApplicationForm } from '@/components/site/admission-application-form';
 import { InquiryForm } from '@/components/site/inquiry-form';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   title: 'Admissions & Online Application',
   description: 'Apply online for school admissions, view admission guidelines, age criteria, and fee structure at Dr. VGN MHSS.',

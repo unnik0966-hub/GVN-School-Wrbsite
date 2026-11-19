@@ -9,8 +9,6 @@ import { SectionHeading } from '@/components/site/section-heading';
 import { formatDate } from '@/lib/format';
 import { isGalleryCategorySlug } from '@/lib/gallery-categories';
 
-export const dynamic = 'force-dynamic';
-
 const ICON_MAP: Record<string, typeof ArrowRight> = {
   GraduationCap,
   FlaskConical,

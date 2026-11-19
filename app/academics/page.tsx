@@ -5,8 +5,6 @@ import type { StaffMember } from '@/lib/types';
 import { SectionHeading } from '@/components/site/section-heading';
 import { BookOpen } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   title: 'Academics & Curriculum',
   description: 'Explore academic streams, curriculum, faculty, and educational programs at Dr. V. Genguswamy Naidu MHSS.',

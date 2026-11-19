@@ -6,8 +6,6 @@ import { formatDate } from '@/lib/format';
 import { isGalleryCategorySlug } from '@/lib/gallery-categories';
 import { CalendarDays, MapPin } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   title: 'School Events & Calendar',
   description: 'Upcoming school events, celebrations, sports meets, cultural programs, and academic calendar.',

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
 import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
 import { X } from 'lucide-react';
@@ -31,25 +31,34 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
   }, [photos, events]);
 
   useEffect(() => {
-    if (isSupabaseConfigured) return;
     let active = true;
     supabase
       .from('gallery_photos')
-      .select('id, event_id, storage_path, public_url, caption, created_at')
+      .select('id, event_id, storage_path, public_url, caption, created_at, event:events ( id, title, slug, event_date )')
       .order('created_at', { ascending: false })
-      .then(({ data }: { data: GalleryPhotoWithEvent[] | null }) => {
+      .then(({ data }: { data: any[] | null }) => {
         if (!active || !data) return;
-        setClientPhotos(data);
+        const normalized: GalleryPhotoWithEvent[] = data.map((p) => ({
+          id: p.id,
+          event_id: p.event_id,
+          public_url: p.public_url,
+          caption: p.caption,
+          created_at: p.created_at,
+          event: Array.isArray(p.event) ? p.event[0] ?? null : (p.event ?? null),
+        }));
+        setClientPhotos(normalized);
         const eventMap = new Map<string, Pick<SchoolEvent, 'id' | 'title' | 'slug' | 'event_date'>>();
         for (const cat of GALLERY_CATEGORIES) {
-          eventMap.set(cat.id, {
-            id: cat.id,
+          const matched = normalized.find((p) => p.event?.slug === cat.slug)?.event;
+          const key = matched ? matched.id : cat.slug;
+          eventMap.set(key, {
+            id: key,
             title: cat.title,
             slug: cat.slug,
-            event_date: '',
+            event_date: matched?.event_date ?? '',
           });
         }
-        for (const p of data) {
+        for (const p of normalized) {
           if (p.event && !Array.from(eventMap.values()).some((e) => e.slug === p.event!.slug || e.id === p.event!.id)) {
             eventMap.set(p.event.id, p.event);
           }
