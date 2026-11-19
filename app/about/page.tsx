@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getContent } from '@/lib/content';
 import { SectionHeading } from '@/components/site/section-heading';
+import { LiveAboutOverview } from '@/components/site/live-about-content';
 
 export const metadata: Metadata = {
   title: 'About Us',
@@ -10,9 +11,6 @@ export const metadata: Metadata = {
   },
 };
 import {
-  Users,
-  Target,
-  ScrollText,
   Trophy,
   Award,
   Medal,
@@ -34,41 +32,11 @@ export default async function AboutPage() {
         description="A matriculation higher secondary school rooted in dignity, discipline, and wonder."
       />
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-3">
-        <article className="rounded-2xl border border-border bg-card p-7 shadow-sm">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <ScrollText className="h-6 w-6" />
-          </div>
-          <h2 className="mt-4 font-serif text-2xl font-semibold">History</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{history}</p>
-        </article>
-
-        <article className="rounded-2xl border border-border bg-card p-7 shadow-sm">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Target className="h-6 w-6" />
-          </div>
-          <h2 className="mt-4 font-serif text-2xl font-semibold">Mission</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mission}</p>
-        </article>
-
-        <article className="rounded-2xl border border-border bg-card p-7 shadow-sm">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Users className="h-6 w-6" />
-          </div>
-          <h2 className="mt-4 font-serif text-2xl font-semibold">Management</h2>
-          <ul className="mt-3 space-y-3 text-sm">
-            {management.map((m, idx) => {
-              const member = m as { name?: string; role?: string };
-              return (
-                <li key={idx} className="flex flex-col">
-                  <span className="font-medium text-foreground">{member.name}</span>
-                  <span className="text-xs text-muted-foreground">{member.role}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </article>
-      </div>
+      <LiveAboutOverview
+        initialHistory={history}
+        initialMission={mission}
+        initialManagement={management as Array<{ name?: string; role?: string }>}
+      />
 
       {/* Our Special Moments */}
       <section className="mt-16">

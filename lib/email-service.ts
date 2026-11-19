@@ -97,7 +97,7 @@ export function formatAdmissionEmailHtml(application: AdmissionApplication): str
 
     <div class="footer">
       This is an automated notification from the Dr. V. Genguswamy Naidu Matriculation Higher Secondary School Admissions Portal.<br/>
-      Website: https://ais-dev-mau7wn5dau5owqhmwosmea-219787692095.asia-southeast1.run.app | Email: ${recipient}
+      Othakalmandapam, Coimbatore – 641032 | Email: ${recipient}
     </div>
   </div>
 </body>
@@ -120,7 +120,9 @@ function formatLevelLabel(level: string): string {
   }
 }
 
-export async function sendAdmissionEmail(application: AdmissionApplication): Promise<{ success: boolean; messageId?: string; simulated?: boolean; error?: string }> {
+export async function sendAdmissionEmail(
+  application: AdmissionApplication
+): Promise<{ success: boolean; delivered: boolean; messageId?: string; simulated?: boolean; error?: string }> {
   const recipient = getRecipientEmail();
   const htmlContent = formatAdmissionEmailHtml(application);
 
@@ -128,7 +130,7 @@ export async function sendAdmissionEmail(application: AdmissionApplication): Pro
   const smtpPort = Number(process.env.SMTP_PORT || '587');
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const smtpFrom = process.env.SMTP_FROM || `"VGN Admissions" <admissions@vgnschool.edu.in>`;
+  const smtpFrom = process.env.SMTP_FROM || (smtpUser ? `"VGN Admissions" <${smtpUser}>` : `"VGN Admissions" <admissions@vgnschool.edu.in>`);
 
   if (smtpHost && smtpUser && smtpPass) {
     try {
@@ -151,18 +153,24 @@ export async function sendAdmissionEmail(application: AdmissionApplication): Pro
       });
 
       console.log('Admission email sent via SMTP:', info.messageId);
-      return { success: true, messageId: info.messageId };
+      return { success: true, delivered: true, messageId: info.messageId, simulated: false };
     } catch (err: any) {
       console.error('SMTP send error, falling back to recorded dispatch:', err);
+      return {
+        success: true,
+        delivered: false,
+        simulated: true,
+        error: err?.message || 'SMTP dispatch failed',
+      };
     }
   }
 
-  // Graceful simulation / robust logging for container environments
+  // Graceful simulation / robust logging when SMTP credentials are not configured
   console.log('========================================================');
   console.log(`[ADMISSION DISPATCH TO ${recipient}] Application ${application.application_no}`);
   console.log(`Student: ${application.student_name} | Grade: ${application.grade_applying}`);
   console.log(`Parent: ${application.father_name} / ${application.mother_name} | Email: ${application.primary_email} | Phone: ${application.father_phone}`);
   console.log('========================================================');
 
-  return { success: true, simulated: true };
+  return { success: true, delivered: false, simulated: true };
 }

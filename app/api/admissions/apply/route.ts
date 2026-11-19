@@ -91,6 +91,10 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
     };
 
+    // Dispatch email via SMTP when configured
+    const emailResult = await sendAdmissionEmail(applicationRecord);
+    applicationRecord.email_sent_to_school = Boolean(emailResult.delivered);
+
     // Save to admissions_applications in Supabase / Mock store
     const { error: dbError } = await supabase.from('admissions_applications').insert(applicationRecord);
     if (dbError) {
@@ -108,16 +112,15 @@ export async function POST(req: NextRequest) {
       status: 'new',
     });
 
-    // Send email to the school website email (vgnprincipal@gmail.com)
-    const emailResult = await sendAdmissionEmail(applicationRecord);
-
     return NextResponse.json({
       success: true,
-      message: `Admission application successfully submitted to ${recipient_email}`,
+      message: emailResult.delivered
+        ? `Admission application successfully submitted and emailed to ${recipient_email}`
+        : `Admission application saved (ref: ${application_no})`,
       application_no,
       application: applicationRecord,
       recipient_email,
-      email_delivered: emailResult.success,
+      email_delivered: Boolean(emailResult.delivered),
     });
   } catch (error: any) {
     console.error('Admission submission error:', error);

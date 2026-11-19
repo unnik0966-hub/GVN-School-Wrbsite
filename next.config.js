@@ -1,10 +1,13 @@
 const { PHASE_DEVELOPMENT_SERVER } = require('next/constants');
 
+const isStaticExport =
+  process.env.STATIC_EXPORT === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
 /** @type {(phase: string) => import('next').NextConfig} */
 module.exports = (phase) => ({
   distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next-dev' : '.next',
-  output: 'export',
-  trailingSlash: true,
+  output: isStaticExport ? 'export' : 'standalone',
+  trailingSlash: isStaticExport,
   eslint: {
     ignoreDuringBuilds: true,
   },

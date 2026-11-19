@@ -12,18 +12,19 @@ export const metadata: Metadata = {
   },
 };
 import {
-  FileDown,
-  ClipboardList,
   Baby,
   GraduationCap,
   Sparkles,
   CheckCircle,
-  HelpCircle,
   Phone,
   Mail,
   ShieldCheck,
   Award,
 } from 'lucide-react';
+import {
+  LiveAdmissionSteps,
+  LiveAdmissionDownloads,
+} from '@/components/site/live-admissions-sections';
 
 export default async function AdmissionsPage() {
   const admissions = await getContent('admissions');
@@ -142,24 +143,7 @@ export default async function AdmissionsPage() {
           </div>
 
           {/* Admission Process Steps */}
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-primary" />
-              <h2 className="font-serif text-2xl font-semibold">4-Step Admission Procedure</h2>
-            </div>
-            <ol className="mt-6 space-y-4">
-              {process.map((step, idx) => (
-                <li key={idx} className="flex gap-4">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-serif text-sm font-semibold text-primary-foreground">
-                    {idx + 1}
-                  </span>
-                  <p className="pt-1 text-sm leading-relaxed text-muted-foreground">
-                    {String(step)}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <LiveAdmissionSteps initialProcess={process.map(String)} />
 
           {/* Documents Required Checklist */}
           <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
@@ -224,33 +208,9 @@ export default async function AdmissionsPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <FileDown className="h-5 w-5 text-primary" />
-                <h3 className="font-serif text-lg font-semibold">Prospectus & Downloads</h3>
-              </div>
-              <ul className="mt-4 space-y-3">
-                {forms.map((form, idx) => {
-                  const f = form as { label?: string; href?: string };
-                  return (
-                    <li key={idx}>
-                      <a
-                        href={f.href ?? '#'}
-                        className="group flex items-center justify-between rounded-xl border border-border bg-secondary/40 px-4 py-3 text-xs font-medium shadow-sm transition-all hover:border-primary/40 hover:bg-card"
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <FileDown className="h-4 w-4 text-primary" />
-                          {f.label}
-                        </span>
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground group-hover:text-primary">
-                          PDF
-                        </span>
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <LiveAdmissionDownloads
+              initialForms={forms as Array<{ label?: string; href?: string }>}
+            />
           </div>
         </aside>
       </div>

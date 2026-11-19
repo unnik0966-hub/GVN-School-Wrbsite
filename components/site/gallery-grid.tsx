@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { GALLERY_CATEGORIES, isGalleryCategorySlug } from '@/lib/gallery-categories';
+import { resolveAssetUrl } from '@/lib/asset-url';
 import type { GalleryPhoto, SchoolEvent } from '@/lib/types';
 import { X } from 'lucide-react';
 
@@ -110,7 +111,7 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={photo.public_url}
+                src={resolveAssetUrl(photo.public_url)}
                 alt={photo.caption || 'Annual Day photo'}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -148,7 +149,7 @@ export function GalleryGrid({ photos, events }: GalleryGridProps) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={lightbox.public_url}
+              src={resolveAssetUrl(lightbox.public_url)}
               alt={lightbox.caption || 'Annual Day photo'}
               className="max-h-[80vh] w-full object-contain"
             />

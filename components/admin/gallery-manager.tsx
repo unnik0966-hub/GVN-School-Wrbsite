@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { GALLERY_CATEGORIES } from '@/lib/gallery-categories';
+import { resolveAssetUrl } from '@/lib/asset-url';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -221,7 +222,7 @@ export function GalleryManager() {
           {rows.map((row) => (
             <div key={row.id} className="overflow-hidden rounded-xl border border-border bg-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={row.public_url} alt={row.caption || 'Gallery photo'} className="aspect-square w-full object-cover" />
+              <img src={resolveAssetUrl(row.public_url)} alt={row.caption || 'Gallery photo'} className="aspect-square w-full object-cover" />
               <div className="flex items-center justify-between gap-2 p-3">
                 <div className="min-w-0">
                   {row.event?.title && (

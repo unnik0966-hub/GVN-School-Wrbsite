@@ -180,7 +180,9 @@ export function AdmissionApplicationForm() {
           if (!res.ok) {
             throw new Error(data.error || 'Failed to submit admission application.');
           }
-          applicationResult = data.application;
+          applicationResult = data.application
+            ? { ...data.application, email_sent_to_school: Boolean(data.email_delivered) }
+            : null;
         }
       } catch (fetchErr: any) {
         if (fetchErr instanceof TypeError) {
@@ -298,7 +300,19 @@ export function AdmissionApplicationForm() {
             Admission Application Received
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            A copy of this completed form has been sent directly to the school administration email (<strong className="text-foreground">vgnprincipal@gmail.com</strong>).
+            {submittedData.email_sent_to_school ? (
+              <>
+                A copy of this completed form has been sent directly to the school administration email (
+                <strong className="text-foreground">vgnprincipal@gmail.com</strong>).
+              </>
+            ) : (
+              <>
+                Your application is saved under reference{' '}
+                <strong className="text-foreground">{submittedData.application_no}</strong>. Click{' '}
+                <strong className="text-foreground">Send Copy via Email</strong> below to forward your full form to{' '}
+                <strong className="text-foreground">vgnprincipal@gmail.com</strong>, or print/save this receipt.
+              </>
+            )}
           </p>
 
           <div className="mt-6 rounded-2xl border border-border bg-secondary/40 p-5 text-left space-y-4">
@@ -368,10 +382,37 @@ export function AdmissionApplicationForm() {
               asChild
             >
               <a
-                href={`mailto:vgnprincipal@gmail.com?subject=Inquiry regarding Application ${submittedData.application_no} - ${submittedData.student_name}&body=Dear Principal,%0D%0A%0D%0AI have submitted an online admission application for my child ${submittedData.student_name} for ${submittedData.grade_applying} (Ref: ${submittedData.application_no}).%0D%0A%0D%0AParent Contact: ${submittedData.father_phone}%0D%0AEmail: ${submittedData.primary_email}`}
+                href={`mailto:vgnprincipal@gmail.com?subject=${encodeURIComponent(
+                  `Admission Application ${submittedData.application_no} - ${submittedData.student_name}`
+                )}&body=${encodeURIComponent(
+                  [
+                    'Dear Principal,',
+                    '',
+                    'Please find my online admission application details below:',
+                    `Application Reference: ${submittedData.application_no}`,
+                    `Academic Year: ${submittedData.academic_year}`,
+                    `Student Name: ${submittedData.student_name}`,
+                    `Date of Birth: ${submittedData.date_of_birth}`,
+                    `Grade Applying For: ${submittedData.grade_applying}`,
+                    submittedData.stream ? `Stream / Group: ${submittedData.stream}` : null,
+                    `Father Name & Phone: ${submittedData.father_name} (${submittedData.father_phone})`,
+                    `Mother Name & Phone: ${submittedData.mother_name} (${submittedData.mother_phone})`,
+                    `Primary Email: ${submittedData.primary_email}`,
+                    `Address: ${submittedData.residential_address}, ${submittedData.city}, ${submittedData.district} - ${submittedData.pincode}`,
+                    `School Transport: ${
+                      submittedData.transport_required
+                        ? `Yes (${submittedData.transport_pickup_location || 'Pickup requested'})`
+                        : 'No'
+                    }`,
+                  ]
+                    .filter(Boolean)
+                    .join('\n')
+                )}`}
               >
                 <Mail className="mr-2 h-4 w-4" />
-                Contact School via Email
+                {submittedData.email_sent_to_school
+                  ? 'Contact School via Email'
+                  : 'Send Copy via Email'}
               </a>
             </Button>
             <Button
