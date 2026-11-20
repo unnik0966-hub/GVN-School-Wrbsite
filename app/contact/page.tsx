@@ -5,9 +5,22 @@ import { LiveContactDetails } from '@/components/site/live-contact-details';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
-  description: 'Get in touch with Dr. V. Genguswamy Naidu Matriculation Higher Secondary School. Find campus address, contact numbers, email, and visiting hours.',
+  description: 'Get in touch with Dr. V. Genguswamy Naidu Matriculation Higher Secondary School in Othakalmandapam, Coimbatore. Find campus address, contact numbers, email, and visiting hours.',
   alternates: {
     canonical: '/contact',
+  },
+  openGraph: {
+    title: 'Contact Us | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Get in touch with Dr. V. Genguswamy Naidu Matriculation Higher Secondary School in Othakalmandapam, Coimbatore.',
+    url: '/contact',
+    type: 'website',
+    images: [{ url: '/images/school-assembly-hero.jpg', alt: 'Dr. V. Genguswamy Naidu MHSS Campus Contact' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact Us | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Get in touch with Dr. V. Genguswamy Naidu Matriculation Higher Secondary School in Othakalmandapam, Coimbatore.',
+    images: ['/images/school-assembly-hero.jpg'],
   },
 };
 

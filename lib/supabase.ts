@@ -35,9 +35,9 @@ const INITIAL_EVENTS = GALLERY_CATEGORIES.map((cat) => ({
 const INITIAL_ANNOUNCEMENTS = [
   {
     id: 'a1001',
-    title: 'Admissions Open for Academic Year 2025–2026',
-    body: 'Applications are now invited for Kindergarten through Class XII. Visit the admissions section to download forms or submit an inquiry.',
-    publish_date: '2025-08-01',
+    title: 'Admissions Open for Academic Year 2026–2027',
+    body: 'Applications are now invited for Kindergarten through Class XII. Submit the online application form or contact the school office for campus visits.',
+    publish_date: '2026-06-15',
     published: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -46,7 +46,7 @@ const INITIAL_ANNOUNCEMENTS = [
     id: 'a1002',
     title: '100% Pass Result in Board Examinations (X & XII Std)',
     body: 'Congratulations to all our high-achieving toppers and teachers for securing centum scores across Science and Commerce streams.',
-    publish_date: '2025-07-20',
+    publish_date: '2026-05-20',
     published: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -54,8 +54,8 @@ const INITIAL_ANNOUNCEMENTS = [
   {
     id: 'a1003',
     title: 'Parent-Teacher Interactive Forum Schedule',
-    body: 'The term-1 review meeting for Class VI through XII will be held on the upcoming Saturday between 9:00 AM and 1:00 PM.',
-    publish_date: '2025-07-10',
+    body: 'The term review meeting for Class VI through XII will be held on the upcoming Saturday between 9:00 AM and 1:00 PM.',
+    publish_date: '2026-07-10',
     published: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -229,8 +229,8 @@ const INITIAL_INQUIRIES = [
 const INITIAL_APPLICATIONS = [
   {
     id: 'app-1001',
-    application_no: 'VGN-ADM-2025-0101',
-    academic_year: '2025–2026',
+    application_no: 'VGN-ADM-2026-0101',
+    academic_year: '2026–2027',
     level_category: 'nursery_primary',
     grade_applying: 'LKG (Lower Kindergarten)',
     stream: 'General Primary Curriculum',
@@ -266,8 +266,8 @@ const INITIAL_APPLICATIONS = [
   },
   {
     id: 'app-1002',
-    application_no: 'VGN-ADM-2025-0102',
-    academic_year: '2025–2026',
+    application_no: 'VGN-ADM-2026-0102',
+    academic_year: '2026–2027',
     level_category: 'higher_secondary',
     grade_applying: 'Class XI (Higher Secondary First Year)',
     stream: 'Science Group (Physics, Chemistry, Mathematics, Biology)',
@@ -365,6 +365,15 @@ class MockSupabaseStore {
             );
             this.data.gallery_photos = [...customCategoryPhotos, ...INITIAL_GALLERY];
             (this.data as any).__annual_day_only_v1 = true;
+            this.save();
+          }
+          if (!parsed.__session_2026_v1 && Array.isArray(this.data.announcements)) {
+            this.data.announcements = this.data.announcements.map((a: any) =>
+              a.id === 'a1001' && String(a.title || '').includes('2025–2026')
+                ? { ...a, title: 'Admissions Open for Academic Year 2026–2027', publish_date: '2026-06-15' }
+                : a
+            );
+            (this.data as any).__session_2026_v1 = true;
             this.save();
           }
           if (!Array.isArray(this.data.admin_profiles) || !this.data.admin_profiles.some((p: any) => p.user_id === 'mock-admin-id')) {

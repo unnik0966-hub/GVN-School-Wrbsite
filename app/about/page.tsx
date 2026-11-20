@@ -9,6 +9,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/about',
   },
+  openGraph: {
+    title: 'About Us | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Learn about the history, mission, management, and achievements of Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+    url: '/about',
+    type: 'website',
+    images: [{ url: '/images/school-assembly-hero.jpg', alt: 'Dr. V. Genguswamy Naidu MHSS campus' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Learn about the history, mission, management, and achievements of Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+    images: ['/images/school-assembly-hero.jpg'],
+  },
 };
 import {
   Trophy,

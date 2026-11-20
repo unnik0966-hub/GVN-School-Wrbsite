@@ -8,7 +8,7 @@ and secures reads/updates to verified administrators in admin_profiles while per
 CREATE TABLE IF NOT EXISTS public.admissions_applications (
   id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
   application_no text NOT NULL UNIQUE,
-  academic_year text NOT NULL DEFAULT '2025–2026',
+  academic_year text NOT NULL DEFAULT '2026–2027',
   level_category text NOT NULL,
   grade_applying text NOT NULL,
   stream text,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.admissions_applications (
   transport_required boolean NOT NULL DEFAULT false,
   transport_pickup_location text,
   medical_notes text,
-  status text NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted', 'under_review', 'approved', 'rejected')),
+  status text NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted', 'under_review', 'interview_scheduled', 'approved', 'enrolled', 'rejected')),
   email_sent_to_school boolean NOT NULL DEFAULT false,
   recipient_email text,
   created_at timestamptz NOT NULL DEFAULT now(),

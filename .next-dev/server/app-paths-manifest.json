@@ -1,5 +1,4 @@
 {
-  "/page": "app/page.js",
-  "/admissions/page": "app/admissions/page.js",
-  "/api/admissions/apply/route": "app/api/admissions/apply/route.js"
+  "/admin/page": "app/admin/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js"
 }

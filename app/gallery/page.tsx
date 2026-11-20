@@ -12,6 +12,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/gallery',
   },
+  openGraph: {
+    title: 'Photo Gallery | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Annual Day moments and highlights across school categories at Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+    url: '/gallery',
+    type: 'website',
+    images: [{ url: '/images/gallery/annual-day-celebrations.jpg', alt: 'Annual Day Photo Gallery' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Photo Gallery | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Annual Day moments and highlights across school categories at Dr. V. Genguswamy Naidu Matriculation Higher Secondary School.',
+    images: ['/images/gallery/annual-day-celebrations.jpg'],
+  },
 };
 
 const GALLERY_EMAIL = 'vgnprincipal@gmail.com';

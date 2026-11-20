@@ -99,22 +99,26 @@ export function LiveAdmissionDownloads({ initialForms }: { initialForms: FormLin
         <h3 className="font-serif text-lg font-semibold">Prospectus &amp; Downloads</h3>
       </div>
       <ul className="mt-4 space-y-3">
-        {forms.map((f, idx) => (
-          <li key={idx}>
-            <a
-              href={f.href ?? '#'}
-              className="group flex items-center justify-between rounded-xl border border-border bg-secondary/40 px-4 py-3 text-xs font-medium shadow-sm transition-all hover:border-primary/40 hover:bg-card"
-            >
-              <span className="flex items-center gap-2.5">
-                <FileDown className="h-4 w-4 text-primary" />
-                {f.label}
-              </span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground group-hover:text-primary">
-                PDF
-              </span>
-            </a>
-          </li>
-        ))}
+        {forms.map((f, idx) => {
+          const rawHref = f.href && f.href !== '#' ? f.href : idx === 0 ? '#application-form' : '#eligibility-guidelines';
+          const isPdf = rawHref.toLowerCase().endsWith('.pdf');
+          return (
+            <li key={idx}>
+              <a
+                href={rawHref}
+                className="group flex items-center justify-between rounded-xl border border-border bg-secondary/40 px-4 py-3 text-xs font-medium shadow-sm transition-all hover:border-primary/40 hover:bg-card"
+              >
+                <span className="flex items-center gap-2.5">
+                  <FileDown className="h-4 w-4 text-primary" />
+                  {f.label}
+                </span>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground group-hover:text-primary">
+                  {isPdf ? 'PDF' : 'View'}
+                </span>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const level_category = (body.level_category || 'nursery_primary') as AdmissionLevelCategory;
     const grade_applying = String(body.grade_applying || '').trim();
     const stream = body.stream ? String(body.stream).trim() : undefined;
-    const academic_year = String(body.academic_year || '2025–2026').trim();
+    const academic_year = String(body.academic_year || '2026–2027').trim();
 
     const father_name = String(body.father_name || '').trim();
     const father_phone = String(body.father_phone || '').trim();
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     // Generate unique Application ID
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const application_no = `VGN-ADM-2025-${randomSuffix}`;
+    const application_no = `VGN-ADM-2026-${randomSuffix}`;
     const recipient_email = getRecipientEmail();
 
     const applicationRecord: AdmissionApplication = {

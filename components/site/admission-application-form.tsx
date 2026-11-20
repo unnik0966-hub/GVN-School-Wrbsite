@@ -128,7 +128,7 @@ export function AdmissionApplicationForm() {
     const formData = new FormData(e.currentTarget);
 
     const payload = {
-      academic_year: String(formData.get('academic_year') ?? '2025–2026'),
+      academic_year: String(formData.get('academic_year') ?? '2026–2027'),
       level_category: levelCategory,
       grade_applying: selectedGrade,
       stream: levelCategory === 'higher_secondary' ? selectedStream : undefined,
@@ -210,13 +210,13 @@ export function AdmissionApplicationForm() {
         }
 
         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-        const application_no = `VGN-ADM-2025-${randomSuffix}`;
+        const application_no = `VGN-ADM-2026-${randomSuffix}`;
         const recipient_email = 'vgnprincipal@gmail.com';
 
         applicationResult = {
           id: `app-${Date.now()}-${randomSuffix}`,
           application_no,
-          academic_year: payload.academic_year || '2025–2026',
+          academic_year: payload.academic_year || '2026–2027',
           level_category: payload.level_category,
           grade_applying: payload.grade_applying,
           stream:
@@ -437,7 +437,7 @@ export function AdmissionApplicationForm() {
       <div className="border-b border-border pb-6">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
           <FileText className="h-4 w-4" />
-          Official Online Admission Portal · 2025–2026
+          Official Online Admission Portal · 2026–2027
         </div>
         <h2 className="mt-2 font-serif text-2xl sm:text-3xl font-semibold text-foreground">
           Student Admission Application Form
@@ -554,11 +554,11 @@ export function AdmissionApplicationForm() {
               <select
                 id="academic_year"
                 name="academic_year"
-                defaultValue="2025–2026"
+                defaultValue="2026–2027"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <option value="2025–2026">2025–2026 (New Academic Session)</option>
-                <option value="2026–2027">2026–2027 (Advance Enrollment)</option>
+                <option value="2026–2027">2026–2027 (Current Academic Session)</option>
+                <option value="2027–2028">2027–2028 (Upcoming Academic Session)</option>
               </select>
             </div>
 

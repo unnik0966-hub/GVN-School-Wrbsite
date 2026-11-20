@@ -6,9 +6,22 @@ import { InquiryForm } from '@/components/site/inquiry-form';
 
 export const metadata: Metadata = {
   title: 'Admissions & Online Application',
-  description: 'Apply online for school admissions, view admission guidelines, age criteria, and fee structure at Dr. VGN MHSS.',
+  description: 'Apply online for 2026–2027 school admissions, view admission guidelines, age criteria, and streams at Dr. V. Genguswamy Naidu MHSS.',
   alternates: {
     canonical: '/admissions',
+  },
+  openGraph: {
+    title: 'Admissions & Online Application | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Apply online for 2026–2027 school admissions, view admission guidelines, age criteria, and streams at Dr. V. Genguswamy Naidu MHSS.',
+    url: '/admissions',
+    type: 'website',
+    images: [{ url: '/images/school-assembly-hero.jpg', alt: 'Admissions at Dr. V. Genguswamy Naidu MHSS' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Admissions & Online Application | Dr. V. Genguswamy Naidu MHSS',
+    description: 'Apply online for 2026–2027 school admissions, view admission guidelines, age criteria, and streams at Dr. V. Genguswamy Naidu MHSS.',
+    images: ['/images/school-assembly-hero.jpg'],
   },
 };
 import {
@@ -35,7 +48,7 @@ export default async function AdmissionsPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 space-y-16">
       <div>
         <SectionHeading
-          eyebrow="Admissions 2025–2026"
+          eyebrow="Admissions 2026–2027"
           title="Apply for Admission"
           description="Nursery & Primary School to Higher Secondary (+1 & +2). Fill the complete application form below to submit directly to the school office."
         />
@@ -91,7 +104,7 @@ export default async function AdmissionsPage() {
 
       {/* Admission Guidelines, Age Eligibility & Document Checklist */}
       <div className="grid gap-10 lg:grid-cols-3">
-        <section className="lg:col-span-2 space-y-12">
+        <section id="eligibility-guidelines" className="lg:col-span-2 space-y-12">
           {/* Age Eligibility Matrix */}
           <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
             <div className="flex items-center gap-2">

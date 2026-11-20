@@ -58,8 +58,8 @@ export const FALLBACK_CONTENT: Record<SiteContentKey, Record<string, unknown>> =
       'Receive the admission confirmation and complete fee payment within seven working days.',
     ],
     forms: [
-      { label: 'Application Form (PDF)', href: '#' },
-      { label: 'Prospectus 2025 (PDF)', href: '#' },
+      { label: 'Online Admission Application Form', href: '#application-form' },
+      { label: 'Prospectus & Guidelines 2026–2027', href: '#eligibility-guidelines' },
     ],
   },
   contact: {
